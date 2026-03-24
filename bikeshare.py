@@ -1,4 +1,6 @@
 import time
+from pathlib import Path
+
 import pandas as pd
 import numpy as np
 
@@ -9,6 +11,21 @@ CITY_DATA = { 'chicago': 'chicago.csv',
               'new york city': 'new_york_city.csv',
               'washington': 'washington.csv' }
 
+def is_valid_input(i) -> bool:
+    try:
+        i = str(i)
+        return not i.isnumeric()
+    except ValueError as e:
+        print(e)
+        return False
+
+def is_valid_city(city: str) -> bool:
+    if city.lower() not in CITY_DATA.keys():
+        return False
+    else:
+        return Path(CITY_DATA[city.lower()]).exists()
+
+
 def get_filters():
     """
     Asks user to specify a city, month, and day to analyze.
@@ -18,14 +35,39 @@ def get_filters():
         (str) month - name of the month to filter by, or "all" to apply no month filter
         (str) day - name of the day of week to filter by, or "all" to apply no day filter
     """
+    city: str
+    month: str
+    day: str
+
     print('Hello! Let\'s explore some US bikeshare data!')
-    # get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
+    # TO DO: get user input for city (chicago, new york city, washington). HINT: Use a while loop to handle invalid inputs
+    while True:
+        city = str(input("Please enter city (Example chicago): "))
+        if is_valid_input(city):
+            city = city.lower()
+            if not is_valid_city(city):
+                print(f"City not found!!. Valid cities => {", ".join(CITY_DATA.keys())}")
+            else:
+                break
+        else:
+            print("Invalid Input. Enter a valid string")
 
+    # TO DO: get user input for month (all, january, february, ... , june)
+    while True:
+        month = input("Please enter month (Example january): ")
+        month = month.lower()
+        if is_valid_input(month):
+            break
+        else:
+            print("Invalid Input. Enter a valid string")
 
-    # get user input for month (all, january, february, ... , june)
-
-
-    # get user input for day of week (all, monday, tuesday, ... sunday)
+    # TO DO: get user input for day of week (all, monday, tuesday, ... sunday)
+    while True:
+        day = input("Please enter day of the week (Example monday): ")
+        if is_valid_input(day):
+            break
+        else:
+            print("Invalid Input. Enter a valid string")
 
 
     print('-'*40)
@@ -43,6 +85,15 @@ def load_data(city, month, day):
     Returns:
         df - Pandas DataFrame containing city data filtered by month and day
     """
+
+    df = pd.read_csv(CITY_DATA[city], parse_dates=["Start Time", "End Time"])
+    df['month'] = df['Start Time'].dt.month_name().str.lower()
+    df["day"] = df['Start Time'].dt.day_name().str.lower()
+    if month != "all":
+        df = df[df['month'] == month.lower()]
+
+    if day != "all":
+        df = df[df['day'] == day.lower()]
 
 
     return df
