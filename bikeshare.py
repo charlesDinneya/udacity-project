@@ -67,7 +67,7 @@ def get_filters():
             print("Invalid Input. Enter a valid string")
 
 
-print('-'*40)
+    print('-'*40)
     return city, month, day
 
 
@@ -82,6 +82,15 @@ def load_data(city, month, day):
     Returns:
         df - Pandas DataFrame containing city data filtered by month and day
     """
+
+    df = pd.read_csv(CITY_DATA[city], parse_dates=["Start Time", "End Time"])
+    df['month'] = df['Start Time'].dt.month_name().str.lower()
+    df["day"] = df['Start Time'].dt.day_name().str.lower()
+    if month != "all":
+        df = df[df['month'] == month.lower()]
+
+    if day != "all":
+        df = df[df['day'] == day.lower()]
 
 
     return df
